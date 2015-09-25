@@ -25,7 +25,7 @@ class Maze:
                 #labels initial state in maze
                 elif char == 'P':
                     self.initialState = (i,j)
-                if char == 'P' or char == '.' or char == '%' or char == ' ': 
+                if char in ['P','.','%',' ']: 
                     self.maze[i].append(char)
                     j+=1
             i+=1
@@ -36,7 +36,8 @@ class Maze:
         '''
         Finds children of a node in maze.
         Input: Current node
-        Printed Output: none
+        
+        ed Output: none
         Returns: List of children
         '''
         children = []
@@ -64,7 +65,7 @@ class Maze:
                 children.append((y+1,x))
         return children
     
-    def printMazeWithPath(self, path):
+    def changeMazeWithPath(self, path):
         '''
         prints the maze with the path
         input: sequence of nodes representing the path taken by the algorithm from start to goal.
@@ -74,7 +75,13 @@ class Maze:
         for row in range(self.height):
             for col in range(self.width):
                 if (row,col) in path:
-                    print ".",
-                else:
-                    print self.maze[row][col],
+                     self.maze[row][col] = "."
+                        
+    def printMaze(self):
+        for row in range(self.height):
+            for col in range(self.width):
+                print self.maze[row][col],
             print " "
+                    
+            
+     
