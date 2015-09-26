@@ -82,6 +82,3 @@ class Maze:
             for col in range(self.width):
                 print self.maze[row][col],
             print " "
-                    
-            
-     
