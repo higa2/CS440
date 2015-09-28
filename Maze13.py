@@ -1,6 +1,7 @@
 import urllib2
+from Maze import *
 
-class Maze:
+class MazeWithGhost(Maze):
     '''
     Creates a data structure to represent the maze problem.
     '''
@@ -36,12 +37,13 @@ class Maze:
                     self.maze[i].append(char)
                     j+=1
             i+=1
+            
+        #state is represented by y position, x position, ghost's y position, ghost's x position.    
+        self.initialState = self.initialState + self.ghostState
+        
         self.height = i #set the height
         self.width = j #set the width
-        
-        # if there is a wall to the right of the ghost
-        if self.maze[ghostState[0]][ghostState[1]+1] == '%':
-            self.ghostDirection = -1
+        self.ghostDirection = 1 #initial direction of the ghost. +1 means the ghost is going right, -1 means the ghost is going left.
         
     def findChildren(self, node):
         '''
@@ -52,46 +54,44 @@ class Maze:
         Returns: List of children
         '''
         children = []
-        x = node[1]
+        x = node[1] #agent's position
         y = node[0]
+        g_x = node[3] #ghost's position
+        g_y = node[2]
+        
+        #cut the path from the search if we ever run into a ghost
+        if (y, x) == (g_y, g_x):
+            return children
+        
+        #keep the ghost in walls.
+        if self.maze[g_y][g_x+1] == '%':
+            self.ghostDirection = -1
+        elif self.maze[g_y][g_x-1] == '%':
+            self.ghostDirection = 1
         
         #check if the left child valid and add to the list
         #player is moving left
         if x-1 >= 0:
             if self.maze[y][x-1] != '%': 
-                if (y,x-1) != (ghostState + (0,ghostDirection)):
-                    if (y,x) != (ghostState + (0,ghostDirection)):
-                        children.append((y,x-1))
+                children.append((y ,x-1 ,g_y, g_x + self.ghostDirection))
         
         #check if the upwards child valid and add to the list
         #player is moving up
         if y-1 >= 0:
             if self.maze[y-1][x] != '%': 
-                if (y,x) != (ghostState + (0,ghostDirection)):
-                    children.append((y-1,x))
+                children.append((y-1 ,x ,g_y, g_x + self.ghostDirection))
         
         #check if the right child valid and add to the list
         #player is moving right
         if x+1 < self.width:
             if self.maze[y][x+1] != '%':
-                if (y,x+1) != (ghostState + (0,ghostDirection)):
-                    if (y,x) != (ghostState + (0,ghostDirection)):
-                        children.append((y,x+1))
+                children.append((y ,x+1 ,g_y, g_x + self.ghostDirection))
 
         #check if the downward child is valid and add to the list
         #player is moving down
         if y+1 < self.height:
             if self.maze[y+1][x] != '%':
-                if (y,x) != (ghostState + (0,ghostDirection)):
-                    children.append((y+1,x))
-                
-        #update ghostState, ghostDirection should already have the correct next move direction
-        #and not hit walls
-        ghostState = ghostState + (0,ghostDirection)
-        
-        #update ghostDirection
-        if self.maze[ghostState[0]][ghostState[1]+ghostDirection] == '%':
-            ghostDirection = ghostDirection * (-1)
+                children.append((y+1 ,x ,g_y, g_x + self.ghostDirection))
         
         return children
     
@@ -102,10 +102,31 @@ class Maze:
         printed output: printed maze with path as a sequence of "."
         return: none
         '''
+        agentPath = []
+        ghostPath = []
+        for node in path:
+            #separate player path
+            agentPath.append((node[0], node[1]))
+            
+            #separate ghost path:
+            ghostPath.append((node[2], node[3]))
+        
+        #change the maze representation to include the path.
         for row in range(self.height):
             for col in range(self.width):
-                if (row,col) in path:
+                if (row,col) in agentPath:
                      self.maze[row][col] = "."
+                if (row, col) == ghostPath[-1]:
+                    self.maze[row][col] = 'G'
+                elif (row, col) in ghostPath:
+                    self.maze[row][col] = "g"
+
+    def printImagesForGIF(self, path):
+        #print one at a time
+        i = 0
+        for node in path:
+            changeMazeWithPath([node])
+            
                         
     def printMaze(self):
         for row in range(self.height):
