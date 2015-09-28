@@ -129,8 +129,7 @@ class MazeWithGhost(Maze):
         for node in path:
             self.changeMazeWithPath([node])
             self.maze[node[0]][node[1]] = "P"
-            if i == 70:
-                print self.printMaze()
+            print self.printMaze()
             i+=1
             self.maze[node[0]][node[1]] = "."
         
